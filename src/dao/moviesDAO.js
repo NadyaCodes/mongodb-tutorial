@@ -235,7 +235,7 @@ export default class MoviesDAO {
     ]
 
     try {
-      const results = await (await movies.aggregate(queryPipeline)).next()
+      const results = await (await movies.aggregate(queryPipeline.concat(skipStage).concat(limitStage).concat(facetStage))).next()
       const count = await (await movies.aggregate(countingPipeline)).next()
       return {
         ...results,
@@ -295,7 +295,7 @@ export default class MoviesDAO {
 
     // TODO Ticket: Paging
     // Use the cursor to only return the movies that belong on the current page
-    const displayCursor = cursor.limit(moviesPerPage)
+    const displayCursor = cursor.limit(moviesPerPage).skip(moviesPerPage * page)
 
     try {
       const moviesList = await displayCursor.toArray()
