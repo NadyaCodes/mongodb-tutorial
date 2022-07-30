@@ -1,3 +1,5 @@
+import { MAJORITY } from "mongodb/lib/read_concern"
+
 let users
 let sessions
 
@@ -62,7 +64,7 @@ export default class UsersDAO {
       // TODO Ticket: Durable Writes
       // Use a more durable Write Concern for this operation.
       // await users.insertOne({ someField: "someValue" })
-      await users.insertOne({ "name": userInfo.name, "email": userInfo.email, "password": userInfo.password })
+      await users.insertOne({ w: "majority", "name": userInfo.name, "email": userInfo.email, "password": userInfo.password })
       return { success: true }
     } catch (e) {
       if (String(e).startsWith("MongoError: E11000 duplicate key error")) {
@@ -172,8 +174,9 @@ export default class UsersDAO {
       // TODO Ticket: User Preferences
       // Use the data in "preferences" to update the user's preferences.
       const updateResponse = await users.updateOne(
-        { someField: someValue },
-        { $set: { someOtherField: someOtherValue } },
+        { email: email },
+        { $set: { preferences: preferences } },
+        // { upsert: true }
       )
 
       if (updateResponse.matchedCount === 0) {
